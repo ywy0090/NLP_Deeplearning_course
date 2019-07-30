@@ -19,7 +19,7 @@ def sigmoid(x):
     """
 
     ### YOUR CODE HERE
-    s = 1/(1+math.exp(x))
+    s = 1/(1+np.exp(-x))
     ### END YOUR CODE
 
     return s
@@ -55,7 +55,22 @@ def naiveSoftmaxLossAndGradient(
     """
 
     ### YOUR CODE HERE
+    # forward
+    # assume N words, V dimentions, so
 
+    z = np.dot(centerWordVec,outsideVectors.T )  # (N, 1)
+    preds = softmax(z)  # (N, 1)
+
+    loss = -np.log(preds)[outsideWordIdx]
+
+    # backprop
+    delta = preds.copy()  # (N, 1)
+    delta[outsideWordIdx] -= 1.0
+
+    gradCenterVec = np.dot(delta, outsideVectors)  # (V, 1)
+    gradOutsideVecs = np.dot(delta[:, np.newaxis], centerWordVec[np.newaxis, :])  # (N, V)
+
+    gradCenterVec = gradCenterVec.flatten()  # (V, )
     ### Please use the provided softmax function (imported earlier in this file)
     ### This numerically stable implementation helps you avoid issues pertaining
     ### to integer overflow. 
@@ -107,8 +122,37 @@ def negSamplingLossAndGradient(
     ### YOUR CODE HERE
 
     ### Please use your implementation of sigmoid in here.
+    ### Please use your implementation of sigmoid in here.
 
+    # indices might have same index
+    # extract W
+    W = np.zeros((len(indices), outsideVectors.shape[1]))
+    for i in range(len(indices)):
+        W[i] = outsideVectors[indices[i]]
 
+    # forward
+    a = centerWordVec
+    a = a.reshape((a.shape[0], 1))
+
+    z = np.dot(W, a)  # (K+1, 1)
+    preds = sigmoid(z)
+
+    # backprop
+    y = np.zeros((preds.shape[0], 1))
+    y[0] = 1  # index 0 is target
+
+    loss = -(y * np.log(preds) + (1 - y) * np.log(1 - preds)).sum()
+
+    delta = preds - y
+    gradCenterVec = np.dot(W.T, delta)  # (V, 1)
+    gradW = np.dot(delta, a.T)  # (K+1, V)
+    gradCenterVec = gradCenterVec.flatten()
+
+    # apply gradW into gradOutsideVecs
+    gradOutsideVecs = np.zeros_like(outsideVectors)
+    for i in range(len(indices)):
+        oi = indices[i]
+        gradOutsideVecs[oi] += gradW[i]
     ### END YOUR CODE
 
     return loss, gradCenterVec, gradOutsideVecs
@@ -150,7 +194,15 @@ def skipgram(currentCenterWord, windowSize, outsideWords, word2Ind,
     gradOutsideVectors = np.zeros(outsideVectors.shape)
 
     ### YOUR CODE HERE
+    ci = word2Ind[currentCenterWord]
+    vc = centerWordVectors[ci]
 
+    for o in outsideWords:
+        oi = word2Ind[o]
+        _loss, gradVc, gradUo= word2vecLossAndGradient(vc, oi, outsideVectors, dataset)
+        gradCenterVecs += gradVc
+        gradOutsideVectors += gradUo
+        loss += _loss
     ### END YOUR CODE
 
     return loss, gradCenterVecs, gradOutsideVectors
