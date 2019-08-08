@@ -77,8 +77,15 @@ def pad_sents(sents, pad_token):
     sents_padded = []
 
     ### COPY OVER YOUR CODE FROM ASSIGNMENT 4
-
-
+    max_len = max([len(s) for s in sents])
+    for s in sents:
+        current_len = len(s)
+        tmp_s = []
+        tmp_s.extend(s)
+        if current_len < max_len:
+            for i in range(max_len - current_len):
+                tmp_s.append(pad_token)
+        sents_padded.append(tmp_s)
     ### END YOUR CODE FROM ASSIGNMENT 4
 
     return sents_padded

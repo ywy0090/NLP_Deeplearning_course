@@ -180,8 +180,14 @@ class VocabEntry(object):
         ### TODO: 
         ###     Connect `words2charindices()` and `pad_sents_char()` which you've defined in 
         ###     previous parts
-        
-
+        batch_size = len(sents)
+        max_sent_len = max([len(s) for s in sents])
+        max_word_len = 21
+        char2indices = self.words2charindices(sents)
+        sents_paded = pad_sents_char(char2indices, self.char2id['<pad>'])
+        sents_tensor = torch.tensor(sents_paded, dtype=torch.long, device=device)
+        sents_tensor = sents_tensor.view(max_sent_len, batch_size, max_word_len)
+        return sents_tensor
         ### END YOUR CODE
 
     def to_input_tensor(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:

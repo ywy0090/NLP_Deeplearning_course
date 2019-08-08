@@ -96,6 +96,22 @@ def question_1f_sanity_check():
     print("-"*80)
 
 
+def question_1g_sanity_check():
+    """ Sanity check for to_input() function.
+    """
+    print ("-"*80)
+    print("Running Sanity Check for Question 1g: Reshape")
+    print ("-"*80)
+    vocab = VocabEntry()
+
+    print("Running test on a list of sentences")
+    sentences = [['Human:', 'What', 'do', 'we', 'want?'], ['Computer:', 'Natural', 'language', 'processing!'], ['Human:', 'When', 'do', 'we', 'want', 'it?'], ['Computer:', 'When', 'do', 'we', 'want', 'what?']]
+    sent_tensor = vocab.to_input_tensor_char(sentences, "cpu")
+
+    print("Sanity Check Passed for Question 1g: Reshape!")
+    print("-"*80)
+
+
 def question_1j_sanity_check(model):
 	""" Sanity check for model_embeddings.py 
 		basic shape check

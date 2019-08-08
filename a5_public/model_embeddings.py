@@ -9,7 +9,7 @@ Sahil Chopra <schopra8@stanford.edu>
 Anand Dhoot <anandd@stanford.edu>
 Michael Hahn <mhahn2@stanford.edu>
 """
-
+import torch
 import torch.nn as nn
 
 # Do not change these imports; your module names should be
@@ -17,8 +17,8 @@ import torch.nn as nn
 #   `Highway` in the file `highway.py`
 # Uncomment the following two imports once you're ready to run part 1(j)
 
-# from cnn import CNN
-# from highway import Highway
+from cnn import CNN
+from highway import Highway
 
 # End "do not change" 
 
@@ -40,11 +40,12 @@ class ModelEmbeddings(nn.Module):
         ## End A4 code
 
         ### YOUR CODE HERE for part 1j
-
+        self.embed_size = embed_size
+        self.embed_layer = nn.Embedding(len(vocab.char2id), embed_size)
 
         ### END YOUR CODE
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor):
         """
         Looks up character-based CNN embeddings for the words in a batch of sentences.
         @param input: Tensor of integers of shape (sentence_length, batch_size, max_word_length) where
@@ -60,6 +61,20 @@ class ModelEmbeddings(nn.Module):
 
         ### YOUR CODE HERE for part 1j
 
-
+        sent_len, batch_size, max_word_len = input.size()
+        # define layers
+        cnn_layer = CNN(sent_len, embed_size=self.embed_size, k=5, f=self.embed_size)
+        highway_layer = Highway(self.embed_size)
+        dropout_layer = nn.Dropout(0.3)
+        # forward tensor
+        # input = input.view(batch_size, sent_len*max_word_len)
+        embeded = self.embed_layer(input)
+        embeded = embeded.view(sent_len*batch_size, self.embed_size, max_word_len)
+        x_conv = cnn_layer(embeded)
+        x_conv = torch.squeeze(x_conv, 2)
+        x_highway = highway_layer(x_conv)
+        x_emd_word = dropout_layer(x_highway)
+        x_emd_word = x_emd_word.view(sent_len, batch_size, self.embed_size)
+        return x_emd_word
         ### END YOUR CODE
 
