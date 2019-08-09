@@ -53,6 +53,8 @@ def pad_sents_char(sents, char_pad_token):
             if current_len < max_word_length:
                 for i in range(max_word_length-current_len):
                     tmp_s.append(char_pad_token)
+            if len(tmp_s) > 21:
+                tmp_s = tmp_s[0:max_word_length]
             tmp_sent.append(tmp_s)
         if current_sent_len < max_sent_len:
             for i in range(max_sent_len - current_sent_len):

@@ -410,7 +410,7 @@ class NMT(nn.Module):
         args = params['args']
         model = NMT(vocab=params['vocab'], no_char_decoder=no_char_decoder, **args)
         model.load_state_dict(params['state_dict'])
-
+        # model.load_state_dict(torch.load(model_path), strict=False)
         return model
 
     def save(self, path: str):
